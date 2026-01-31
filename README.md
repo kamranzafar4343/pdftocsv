@@ -1,42 +1,62 @@
-PDF → CSV Converter (Exact Technical Steps)
-1. Create Laravel project
+````md
+# PDF to CSV Converter — Technical Steps
+
+These are the exact steps to rebuild this project later without rethinking the design.
+
+---
+
+## 1. Create Laravel Project
+```bash
 laravel new pdftocsv
+````
 
-2. Install Java (JDK)
+---
 
-Verify:
+## 2. Install Java (JDK)
 
+Verify installation:
+
+```bash
 where java
+```
 
+Use the full path of `java.exe` in the code.
 
-Use full path of java.exe in code.
+---
 
-3. Download Tabula
+## 3. Download Tabula
 
-Download tabula-jar-with-dependencies.jar
+* Download `tabula-jar-with-dependencies.jar`
+* Rename to:
 
-Rename to:
-
+```
 tabula.jar
+```
 
+* Place it in:
 
-Place in:
-
+```
 storage/app/tabula.jar
+```
 
-4. Create Controller
+---
+
+## 4. Create Controller
+
+```bash
 php artisan make:controller PdfController
+```
 
-5. Controller Logic (core)
+---
 
-Get uploaded file real path
+## 5. Controller Logic (Core)
 
-Run Tabula via exec()
+* Get the uploaded file real path
+* Execute Tabula via `exec()`
+* Capture CSV output
+* Return CSV as download
 
-Capture CSV output
-
-Return file as download
-
+```php
 $pdfPath = $request->file('pdf')->getRealPath();
 
 $javaPath = "C:\\Program Files\\Eclipse Adoptium\\jdk-xx\\bin\\java.exe";
@@ -44,57 +64,78 @@ $tabulaJar = storage_path("app/tabula.jar");
 
 $command = "\"$javaPath\" -jar \"$tabulaJar\" -p all -f CSV \"$pdfPath\"";
 
-exec($command." 2>&1", $output);
+exec($command . " 2>&1", $output);
 
-file_put_contents($outputCsv, implode("\n",$output));
+file_put_contents($outputCsv, implode("\n", $output));
 
 return response()->download($outputCsv);
+```
 
-6. Routes
+---
+
+## 6. Routes
+
+```php
 Route::get('/pdf', fn() => view('pdf'));
-Route::post('/convert', [PdfController::class,'convert']);
+Route::post('/convert', [PdfController::class, 'convert']);
+```
 
-7. Frontend (single page, no reload)
+---
 
-File input
+## 7. Frontend (Single Page, No Reload)
 
-JS Fetch API
+* File input
+* JavaScript Fetch API
+* Download CSV blob
 
-Download CSV blob
-
+```js
 const formData = new FormData();
 formData.append('pdf', file);
 
-fetch('/convert',{method:'POST',body:formData})
-.then(res=>res.blob())
-.then(blob=>{
-  const url = URL.createObjectURL(blob);
-  window.location = url;
-});
+fetch('/convert', { method: 'POST', body: formData })
+  .then(res => res.blob())
+  .then(blob => {
+    const url = URL.createObjectURL(blob);
+    window.location = url;
+  });
+```
 
-8. PHP settings
+---
 
-In php.ini:
+## 8. PHP Settings
 
+In `php.ini`:
+
+```
 disable_functions =
+```
 
+Make sure `exec` is enabled.
 
-(make sure exec is allowed)
+---
 
-9. Requirements
+## 9. Requirements
 
-PHP 8+
+* PHP 8+
+* Java JDK
+* Tabula.jar
+* Works only for text-based PDFs (not scanned images)
 
-Java JDK
+---
 
-Tabula.jar
+## 10. Run Project
 
-Works only for text-based PDFs (not scanned images)
-
-10. Run
+```bash
 php artisan serve
+```
 
+Open in browser:
 
-Open:
-
+```
 http://127.0.0.1:8000/pdf
+```
+
+---
+
+```
+```
